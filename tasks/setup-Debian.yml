@@ -35,3 +35,17 @@
     - ib_logfile0
     - ib_logfile1
   when: not mysql_installed.stat.exists
+
+# Debian Buster (and up?) handle the debian.cnf differently, there's no
+# debian-sys-maint user and root@localhost is allowed passwordless
+# connection. My workflow doesn't suit this however, and sets a root
+# password. So we add this to the debian.cnf so other tooling can 
+# access it.
+- name: Install debian.cnf with root password
+  template:
+    src: debian.cnf.j2
+    dest: /etc/mysql/debian.cnf
+    owner: root
+    group: root
+    mode: 0600
+  when: ansible_distribution == 'Debian' and ansible_lsb.major_release|int >= 10
